@@ -1,0 +1,22 @@
+{
+	"name": "meisam-mulla/flysystem-stretchfs",
+	"description": "A Flysystem adapter for StretchFS.",
+	"type": "library",
+	"require": {
+		"php": "^8.0",
+		"league/flysystem": "^3.0",
+		"meisam-mulla/sfs-client": "^1.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"MeisamMulla\\FlysystemStretchfs\\": "src/"
+		}
+	},
+	"extra": {
+		"laravel": {
+			"providers": [
+				"MeisamMulla\\FlysystemStretchfs\\ServiceProvider"
+			]
+		}
+	}
+}
