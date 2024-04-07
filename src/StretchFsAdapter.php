@@ -169,19 +169,24 @@ class StretchFsAdapter implements FilesystemAdapter
         try {
             $items = $this->client->fileList($path);
 
-            foreach ($items as $item) {
+            foreach ($items['files'] as $item) {
                 yield FileAttributes::fromArray([
                     'path' => $item['path'],
                     'type' => $item['folder'] ? 'dir' : 'file',
                     'visibility' => 'private',
-                    'size' => $item['folder'] ? 0 : $item['file']['size'],
-                    'mimetype' => $item['folder'] ? 'directory' : $item['mimetype'],
-                    'timestamp' => $item['folder'] ? null : $item['file']['updatedAt'],
+                    'size' => $item['size'],
+                    'mimetype' => $item['mimeType'],
+                    'timestamp' => $item['updatedAt'],
                 ]);
             }
         } catch (Exception $e) {
             throw new FilesystemException($path, $e->getMessage());
         }
+    }
+
+    public function temporaryUrl(string $path, \DateTimeInterface $expiration, array $options): string
+    {
+        return $this->client->fileDownloadUrl($path, $expiration->getTimestamp())['url'];
     }
 
     public function move(string $source, string $destination, Config $config): void
