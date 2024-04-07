@@ -82,7 +82,7 @@ class StretchFsAdapter implements FilesystemAdapter
 
             return ['stream' => $stream];
         } catch (Exception $e) {
-            throw UnableToReadFile::atLocation($path, $e->getMessage(), $e);
+            throw new UnableToReadFile($path, $e->getMessage(), $e);
         }
     }
 
