@@ -2,20 +2,22 @@
 namespace MeisamMulla\FlysystemStretchfs;
 
 use Exception;
+use DateTimeInterface;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
+use MeisamMulla\SfsClient\StretchFS;
+use League\Flysystem\UnableToReadFile;
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\UnableToWriteFile;
+use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\FilesystemException;
+use League\Flysystem\UnableToSetVisibility;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
-use League\Flysystem\UnableToDeleteFile;
-use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
-use League\Flysystem\UnableToSetVisibility;
-use League\Flysystem\UnableToWriteFile;
-use MeisamMulla\SfsClient\StretchFS;
+use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
 
-class StretchFsAdapter implements FilesystemAdapter
+class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator
 {
     protected $client;
 
@@ -184,9 +186,14 @@ class StretchFsAdapter implements FilesystemAdapter
         }
     }
 
-    public function temporaryUrl(string $path, \DateTimeInterface $expiration, array $options): string
+    public function getTemporaryUrl(string $path, DateTimeInterface $expiration, $config): string
     {
-        return $this->client->fileDownloadUrl($path, $expiration->getTimestamp())['url'];
+        return $this->client->fileDownloadUrl($path, $expiration->getTimestamp() - time())['url'];
+    }
+
+    public function temporaryUrl(string $path, DateTimeInterface $expiresAt, $config): string
+    {
+        return $this->getTemporaryUrl($path, $expiresAt, $config);
     }
 
     public function move(string $source, string $destination, Config $config): void
