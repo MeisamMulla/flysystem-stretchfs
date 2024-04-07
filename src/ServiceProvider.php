@@ -1,9 +1,10 @@
 <?php
 namespace MeisamMulla\FlysystemStretchfs;
 
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Filesystem;
 use MeisamMulla\SfsClient\StretchFS;
+use League\Flysystem\FilesystemAdapter;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider {
@@ -16,7 +17,11 @@ class ServiceProvider extends BaseServiceProvider {
             
             $adapter = new StretchFsAdapter($client);
 
-            return new Filesystem($adapter);
+            return new FilesystemAdapter(
+                new Filesystem($adapter, $config),
+                $adapter,
+                $config
+            );
         });
     }
 }
