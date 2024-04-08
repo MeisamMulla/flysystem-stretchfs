@@ -160,7 +160,7 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
 
             return FileAttributes::fromArray([
                 'path' => $path,
-                'fileSize' => $item['file']['size'],
+                'fileSize' => intval($item['file']['size']),
             ]);
         } catch (Exception $e) {
             throw new UnableToRetrieveMetadata($path, $e->getMessage());
