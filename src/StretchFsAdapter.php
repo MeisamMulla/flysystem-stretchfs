@@ -152,7 +152,7 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
                 $path,
                 null,
                 null,
-                $item['file']['updatedAt']
+                strtotime($item['file']['updatedAt'])
             );
         } catch (Exception $e) {
             throw UnableToRetrieveMetadata::lastModified($path, $e->getMessage());
