@@ -158,10 +158,10 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
         try {
             $item = $this->client->fileDetail($path);
 
-            return FileAttributes::fromArray([
-                'path' => $path,
-                'fileSize' => intval($item['file']['size']),
-            ]);
+            return new FileAttributes(
+                $path,
+                $item['file']['size'] ?? null
+            );
         } catch (Exception $e) {
             throw new UnableToRetrieveMetadata($path, $e->getMessage());
         }
