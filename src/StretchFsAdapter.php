@@ -184,7 +184,7 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
 
             foreach ($items['files'] as $item) {
                 yield FileAttributes::fromArray([
-                    'path' => $item['path'],
+                    'path' => $item['name'],
                     'type' => $item['folder'] ? 'dir' : 'file',
                     'visibility' => 'private',
                     'size' => $item['size'],
