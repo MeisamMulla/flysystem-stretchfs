@@ -15,9 +15,10 @@ use League\Flysystem\UnableToSetVisibility;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToRetrieveMetadata;
+use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
 
-class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator
+class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, PublicUrlGenerator
 {
     protected $client;
 
@@ -194,6 +195,16 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator
     public function temporaryUrl(string $path, DateTimeInterface $expiresAt, $config): string
     {
         return $this->getTemporaryUrl($path, $expiresAt, $config);
+    }
+
+    public function getUrl(string $path): string
+    {
+        return $this->client->fileDownloadUrl($path)['url'];
+    }
+
+    public function publicUrl(string $path, $config): string
+    {
+        return $this->client->fileDownloadUrl($path)['url'];
     }
 
     public function move(string $source, string $destination, Config $config): void
