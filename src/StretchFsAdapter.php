@@ -17,14 +17,18 @@ use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
+use League\MimeTypeDetection\MimeTypeDetector;
+use League\MimeTypeDetection\FinfoMimeTypeDetector;
 
 class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, PublicUrlGenerator
 {
     protected $client;
+    protected MimeTypeDetector $mimeTypeDetector;
 
-    public function __construct(StretchFS $client)
+    public function __construct(StretchFS $client, MimeTypeDetector $mimeTypeDetector = null)
     {
         $this->client = $client;
+        $this->mimeTypeDetector = $mimeTypeDetector ?: new FinfoMimeTypeDetector();
     }
 
     public function fileExists(string $path): bool
@@ -136,7 +140,7 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
                 null,
                 null,
                 null,
-                $item['mimetype']
+                $this->mimeTypeDetector->detectMimeTypeFromPath($path)
             );
         } catch (Exception $e) {
             throw new UnableToRetrieveMetadata($path, $e->getMessage());
@@ -184,8 +188,8 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
                     'type' => $item['folder'] ? 'dir' : 'file',
                     'visibility' => 'private',
                     'size' => $item['size'],
-                    'mimetype' => $item['mimeType'],
-                    'timestamp' => $item['updatedAt'],
+                    'mimetype' => $this->mimeTypeDetector->detectMimeTypeFromPath($item['path']),
+                    'timestamp' => strtotime($item['updatedAt']),
                 ]);
             }
         } catch (Exception $e) {
