@@ -15,10 +15,11 @@ use League\Flysystem\UnableToSetVisibility;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToRetrieveMetadata;
+use League\MimeTypeDetection\MimeTypeDetector;
+use League\Flysystem\UnableToGenerateTemporaryUrl;
+use League\MimeTypeDetection\FinfoMimeTypeDetector;
 use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
-use League\MimeTypeDetection\MimeTypeDetector;
-use League\MimeTypeDetection\FinfoMimeTypeDetector;
 
 class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, PublicUrlGenerator
 {
@@ -64,10 +65,7 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
     public function writeStream(string $path, $resource, Config $config): void
     {
         if (is_resource($resource)) {
-            $contents = stream_get_contents($resource);
-            fclose($resource);
-
-            $this->write($path, $contents, $config);
+            $this->client->fileUploadFromResource($resource, basename($path), pathinfo($path, PATHINFO_DIRNAME));
         } else {
             throw UnableToWriteFile::atLocation($path, 'The provided resource is not valid.');
         }
@@ -199,7 +197,12 @@ class StretchFsAdapter implements FilesystemAdapter, TemporaryUrlGenerator, Publ
 
     public function getTemporaryUrl(string $path, DateTimeInterface $expiration, $config): string
     {
-        return $this->client->fileDownloadUrl($path, $expiration->getTimestamp() - time())['url'];
+        try {
+            return $this->client->fileDownloadUrl($path, $expiration->getTimestamp() - time())['url'];
+        } catch (Exception $e) {
+            throw new UnableToGenerateTemporaryUrl($path, $e->getMessage());
+        }
+
     }
 
     public function temporaryUrl(string $path, DateTimeInterface $expiresAt, $config): string
